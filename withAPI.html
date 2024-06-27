@@ -1,0 +1,53 @@
+<html>
+<head>
+    <title>eSewa Payment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+</head>
+<body>
+    <div id="container">
+    </div>
+
+    <script>
+        const amount = 100;
+        const taxAmount = 0;
+        const totalAmount = 100;
+        const productServiceCharge = 0;
+        const productDeliveryCharge = 0;
+        const successURL = "https://example.com/success";
+        const failureURL = "https://example.com/failure";
+        const uuid = Date.now();
+        const message = `total_amount=${amount},transaction_uuid=${uuid},product_code=EPAYTEST`;
+        const secret = "8gBm/:&EnhH.1/q";
+        const s = CryptoJS.HmacSHA256(message, secret);
+        const signature = CryptoJS.enc.Base64.stringify(s);
+
+        const data = {
+            amount: amount,
+            signature: signature,
+            transaction_uuid: uuid,
+            product_code: 'EPAYTEST'
+        };
+        createForm()
+        function createForm() {
+            const formHTML = `
+            <form id="esewaForm" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST">
+                <input type="text" name="amount" value="${amount}">
+                <input type="text" name="tax_amount" value="${taxAmount}">
+                <input type="text" name="total_amount" value="${totalAmount}">
+                <input type="text" name="transaction_uuid" value="${uuid}">
+                <input type="text" name="product_code" value="EPAYTEST">
+                <input type="text" name="product_service_charge" value="${productServiceCharge}">
+                <input type="text" name="product_delivery_charge" value="${productDeliveryCharge}">
+                <input type="text" name="success_url" value="${successURL}">
+                <input type="text" name="failure_url" value="${failureURL}">
+                <input type="text" id="signed_field_names" name="signed_field_names" value="total_amount,transaction_uuid,product_code" required>
+                <input type="text" name="signature" value="${signature}">
+                <input type="submit" value="eSewa">
+            </form>
+            `;
+
+            document.getElementById('container').innerHTML = formHTML;
+        }
+    </script>
+</body>
+</html>

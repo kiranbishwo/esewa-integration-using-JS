@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>eSewa Payment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+</head>
+<body>
+    <div id="container">
+        <!-- The form will be inserted here -->
+    </div>
+    <button onclick="fetchSignature()">Fetch signature</button>
+
+    <script>
+        const amount = 100;
+        const taxAmount = 0;
+        const totalAmount = 100;
+        const productServiceCharge = 0;
+        const productDeliveryCharge = 0;
+        const successURL = "https://example.com/success";
+        const failureURL = "https://example.com/failure";
+        const signedFieldNames = "amount,tax_amount,total_amount,transaction_uuid,product_code";
+
+       
+
+        function fetchSignature() {
+            fetch('http://127.0.0.1:8000/api/calculatesignature', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({"amount": amount})
+            })
+            .then(response => response.json())
+            .then(data => {
+            createForm(data);
+            })
+            .catch(error => console.error('Error fetching hash:', error));
+        }
+
+        function createForm(data) {
+            var productCode = data.product_code;
+            var transaction_uuid = data.transaction_uuid;
+            var signature = data.signature;
+            console.log(data);
+            const formHTML = `
+            <form id="esewaForm" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST">
+                <input type="hidden" name="amount" value="${amount}">
+                <input type="text" name="tax_amount" value="${taxAmount}">
+                <input type="text" name="total_amount" value="${totalAmount}">
+                <input type="text" name="transaction_uuid" value="${transaction_uuid}">
+                <input type="text" name="product_code" value="${productCode}">
+                <input type="text" name="product_service_charge" value="${productServiceCharge}">
+                <input type="text" name="product_delivery_charge" value="${productDeliveryCharge}">
+                <input type="text" name="success_url" value="${successURL}">
+                <input type="text" name="failure_url" value="${failureURL}">
+                <input type="hidden" id="signed_field_names" name="signed_field_names" value="total_amount,transaction_uuid,product_code" required>
+                <input type="text" name="signature" value="${signature}">
+                <input type="submit" value="Submit">
+            </form>
+            `;
+
+            document.getElementById('container').innerHTML = formHTML;
+        }
+    </script>
+</body>
+</html>
